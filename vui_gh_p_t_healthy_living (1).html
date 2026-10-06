@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VUI GHÉP TỪ – HEALTHY LIVING</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-cream: #FFFDF0;
+            --green-light: #80ED99;
+            --green-main: #48BB78;
+            --green-dark: #2F855A;
+            --yellow-warm: #ECC94B;
+            --yellow-light: #FEFCBF;
+            --pink-soft: #FED7E2;
+            --pink-accent: #ED64A6;
+            --red-soft: #FEB2B2;
+            --red-accent: #E53E3E;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: var(--bg-cream);
+            color: #2D3748;
+            overflow-x: hidden;
+            touch-action: manipulation;
+            user-select: none;
+        }
+
+        .font-fredoka {
+            font-family: 'Fredoka', cursive, sans-serif;
+        }
+
+        /* Glassmorphism & Soft Card Styles */
+        .game-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 4px solid #E2E8F0;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+        }
+
+        /* Custom Button Press Effects */
+        .btn-game {
+            transition: all 0.15s ease-in-out;
+            box-shadow: 0 6px 0 rgba(0, 0, 0, 0.15);
+        }
+        .btn-game:active:not(:disabled) {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-option {
+            transition: all 0.2s ease;
+            box-shadow: 0 5px 0 #CBD5E0;
+        }
+        .btn-option:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 0 #CBD5E0;
+        }
+        .btn-option:active:not(:disabled) {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 #CBD5E0;
+        }
+
+        /* Option States */
+        .btn-option.correct {
+            background-color: #48BB78 !important;
+            border-color: #2F855A !important;
+            color: white !important;
+            box-shadow: 0 5px 0 #276749 !important;
+            animation: pulse-correct 0.5s ease;
+        }
+
+        .btn-option.wrong {
+            background-color: #FEB2B2 !important;
+            border-color: #E53E3E !important;
+            color: #9B2C2C !important;
+            box-shadow: 0 5px 0 #9B2C2C !important;
+            animation: shake 0.4s ease;
+        }
+
+        /* Animations */
+        @keyframes pulse-correct {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-8px); }
+            40%, 80% { transform: translateX(8px); }
+        }
+
+        /* Floating background elements */
+        .floating-bg {
+            position: absolute;
+            pointer-events: none;
+            z-index: 0;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(5deg); }
+        }
+
+        /* Particles effect canvas */
+        #particleCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 50;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between relative bg-amber-50/30">
+
+    <!-- Canvas cho hiệu ứng chúc mừng (pháo hoa / lá cây rơi) -->
+    <canvas id="particleCanvas"></canvas>
+
+    <!-- Trang trí nền (Hình SVG) -->
+    <div class="floating-bg top-5 left-5 text-emerald-300 opacity-60 hidden md:block">
+        <svg width="80" height="80" viewBox="0 0 24 24" fill="currentColor"><path d="M17,8C15.5,8 14.15,8.5 13.1,9.4C12,6.5 9.1,4.5 5.8,4.5C3.1,4.5 0.8,6.2 0,8.5C1.8,12.2 5.6,14.8 10,14.8C10.6,14.8 11.2,14.7 11.8,14.6C12.8,17.2 15.3,19 18.2,19C21.4,19 24,16.4 24,13.2C24,10.3 21,8 17,8Z"/></svg>
+    </div>
+    <div class="floating-bg bottom-10 right-8 text-yellow-300 opacity-70 hidden md:block" style="animation-delay: -2s;">
+        <svg width="90" height="90" viewBox="0 0 24 24" fill="currentColor"><path d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4M12,6A6,6 0 0,1 18,12A6,6 0 0,1 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6Z"/></svg>
+    </div>
+
+    <!-- MAIN CONTAINER -->
+    <div class="container mx-auto px-4 py-6 max-w-4xl relative z-10 flex-grow flex flex-col justify-center">
+
+        <!-- 1. MÀN HÌNH BẮT ĐẦU -->
+        <div id="startScreen" class="game-card rounded-3xl p-6 md:p-10 text-center border-emerald-300 relative overflow-hidden my-auto">
+            
+            <!-- Banner / Minh họa sinh động -->
+            <div class="flex justify-center items-center gap-4 mb-4">
+                <span class="text-5xl animate-bounce">🏃‍♂️</span>
+                <span class="text-6xl animate-pulse">🥗</span>
+                <span class="text-5xl animate-bounce" style="animation-delay: 0.2s;">🚴‍♀️</span>
+            </div>
+
+            <h1 class="font-fredoka text-3xl md:text-5xl font-extrabold text-emerald-600 tracking-wide mb-2 drop-shadow-sm">
+                VUI GHÉP TỪ – HEALTHY LIVING
+            </h1>
+            <p class="text-lg md:text-2xl font-bold text-amber-500 mb-6 font-fredoka">
+                Tiếng Anh 7 – Word Match Quiz
+            </p>
+
+            <div class="bg-amber-100/60 rounded-2xl p-4 md:p-6 mb-8 max-w-lg mx-auto text-left border border-amber-200">
+                <h3 class="font-bold text-emerald-800 mb-2 flex items-center gap-2">
+                    <span>💡</span> Hướng dẫn chơi:
+                </h3>
+                <ul class="text-sm md:text-base text-gray-700 space-y-2 list-disc list-inside">
+                    <li>Gồm <strong>15 câu hỏi</strong> trắc nghiệm ghép từ Tiếng Anh.</li>
+                    <li>Mỗi câu trả lời đúng nhận <strong>10 điểm</strong>.</li>
+                    <li>Thao tác dễ dàng trên màn hình cảm ứng hoặc máy tính.</li>
+                </ul>
+            </div>
+
+            <!-- Nút Start & Bật Tắt Âm Thanh -->
+            <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
+                <button id="btnStart" onclick="startGame()" class="btn-game bg-emerald-500 hover:bg-emerald-600 text-white font-fredoka text-2xl md:text-3xl px-12 py-4 rounded-full border-b-4 border-emerald-700 flex items-center gap-3 cursor-pointer">
+                    <span>PLAY NOW</span>
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </button>
+
+                <button id="btnToggleSoundStart" onclick="toggleAudio()" class="btn-game bg-amber-400 hover:bg-amber-500 text-amber-900 font-bold p-4 rounded-full border-b-4 border-amber-600 cursor-pointer" title="Bật/Tắt âm thanh">
+                    <span id="soundIconStart" class="text-2xl">🔊</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- 2. MÀN HÌNH CHƠI GAME -->
+        <div id="quizScreen" class="hidden flex-col justify-between min-h-[80vh]">
+            
+            <!-- Header thông tin game -->
+            <div class="game-card rounded-2xl p-4 mb-4 flex flex-wrap justify-between items-center gap-2 border-emerald-200">
+                <!-- Tiến trình câu hỏi -->
+                <div class="flex items-center gap-3">
+                    <span id="questionCounter" class="font-fredoka text-emerald-700 text-lg md:text-xl font-bold bg-emerald-100 px-3 py-1 rounded-xl">
+                        Câu 1/15
+                    </span>
+                    <!-- Thanh Progress Bar -->
+                    <div class="w-28 sm:w-44 bg-gray-200 rounded-full h-4 overflow-hidden border border-gray-300">
+                        <div id="progressBar" class="bg-emerald-500 h-full w-0 transition-all duration-300"></div>
+                    </div>
+                </div>
+
+                <!-- Điểm số & Âm thanh -->
+                <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-1 bg-amber-100 px-3 py-1 rounded-xl border border-amber-300">
+                        <span class="text-xl">⭐</span>
+                        <span id="scoreText" class="font-fredoka text-amber-800 font-extrabold text-lg md:text-xl">Điểm: 0</span>
+                    </div>
+
+                    <button onclick="toggleAudio()" class="p-2 bg-gray-100 hover:bg-gray-200 rounded-xl text-xl border border-gray-300">
+                        <span id="soundIconQuiz">🔊</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Thẻ chứa câu hỏi lớn -->
+            <div class="game-card rounded-3xl p-6 md:p-8 mb-6 text-center border-amber-200 flex-grow flex flex-col justify-center relative">
+                <p id="questionText" class="text-xl md:text-3xl font-bold text-gray-800 leading-relaxed font-fredoka my-4">
+                    <!-- Câu hỏi sẽ nạp ở đây -->
+                </p>
+
+                <!-- Lời khen / Phản hồi Đúng-Sai -->
+                <div id="feedbackContainer" class="hidden my-3 p-3 rounded-2xl text-center font-bold text-base md:text-lg transition-all">
+                    <span id="feedbackIcon" class="text-2xl mr-2"></span>
+                    <span id="feedbackText"></span>
+                </div>
+            </div>
+
+            <!-- 4 Nút Lựa Chọn Đáp Án (A, B, C, D) -->
+            <div id="optionsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <!-- Nút đáp án được render bằng JavaScript -->
+            </div>
+
+            <!-- Nút Chuyển Câu / Kết quả -->
+            <div class="text-right">
+                <button id="btnNext" onclick="nextQuestion()" disabled class="btn-game bg-emerald-500 hover:bg-emerald-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-fredoka text-xl px-8 py-3 rounded-2xl border-b-4 border-emerald-700 flex items-center gap-2 ml-auto">
+                    <span id="btnNextText">Next</span>
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- 3. MÀN HÌNH KẾT QUẢ -->
+        <div id="resultScreen" class="hidden game-card rounded-3xl p-6 md:p-10 text-center border-amber-300 my-auto">
+            <div class="text-6xl mb-2 animate-bounce">🏆</div>
+            <h2 class="font-fredoka text-4xl md:text-5xl font-extrabold text-amber-500 mb-2">Finished!</h2>
+            <p id="resultComment" class="text-lg md:text-2xl font-bold text-emerald-700 font-fredoka mb-6 px-4">
+                <!-- Lời nhận xét sẽ hiện ở đây -->
+            </p>
+
+            <!-- Bảng Thống Kê Điểm Số -->
+            <div class="grid grid-cols-3 gap-3 md:gap-6 max-w-lg mx-auto mb-8">
+                <div class="bg-amber-100 p-4 rounded-2xl border border-amber-300">
+                    <div class="text-xs md:text-sm font-bold text-amber-700">TỔNG ĐIỂM</div>
+                    <div id="finalScore" class="font-fredoka text-2xl md:text-4xl text-amber-900 font-black">0/150</div>
+                </div>
+                <div class="bg-emerald-100 p-4 rounded-2xl border border-emerald-300">
+                    <div class="text-xs md:text-sm font-bold text-emerald-700">CÂU ĐÚNG</div>
+                    <div id="correctCount" class="font-fredoka text-2xl md:text-4xl text-emerald-900 font-black">0</div>
+                </div>
+                <div class="bg-rose-100 p-4 rounded-2xl border border-rose-300">
+                    <div class="text-xs md:text-sm font-bold text-rose-700">CÂU SAI</div>
+                    <div id="wrongCount" class="font-fredoka text-2xl md:text-4xl text-rose-900 font-black">0</div>
+                </div>
+            </div>
+
+            <!-- Nút Chơi Lại -->
+            <button onclick="restartGame()" class="btn-game bg-emerald-500 hover:bg-emerald-600 text-white font-fredoka text-2xl px-10 py-4 rounded-full border-b-4 border-emerald-700 inline-flex items-center gap-3">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                <span>PLAY AGAIN</span>
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        /* 
+        ==========================================================================
+        DỮ LIỆU CÂU HỎI – GIÁO VIÊN CÓ THỂ CHỈNH SỬA TẠI ĐÂY
+        ==========================================================================
+        Mỗi câu hỏi gồm:
+        - id: Thứ tự câu
+        - question: Nội dung câu hỏi
+        - options: Danh sách 4 đáp án [A, B, C, D]
+        - answer: Chỉ số đáp án đúng (0 = A, 1 = B, 2 = C, 3 = D)
+        */
+        const quizData = [
+            {
+                id: 1,
+                question: "You should _______ plenty of water every day.",
+                options: ["A. do", "B. drink", "C. play", "D. make"],
+                answer: 1 // B
+            },
+            {
+                id: 2,
+                question: "You should _______ your teeth twice a day.",
+                options: ["A. brush", "B. wash", "C. take", "D. make"],
+                answer: 0 // A
+            },
+            {
+                id: 3,
+                question: "We should eat more _______ and vegetables.",
+                options: ["A. exercises", "B. fruits", "C. sleep", "D. water"],
+                answer: 1 // B
+            },
+            {
+                id: 4,
+                question: "Getting enough _______ helps you stay healthy.",
+                options: ["A. exercise", "B. sleep", "C. sugar", "D. junk food"],
+                answer: 1 // B
+            },
+            {
+                id: 5,
+                question: "You should _______ your hands before eating.",
+                options: ["A. play", "B. make", "C. wash", "D. take"],
+                answer: 2 // C
+            },
+            {
+                id: 6,
+                question: "Doing regular _______ can help you keep fit.",
+                options: ["A. exercise", "B. homework", "C. medicine", "D. pollution"],
+                answer: 0 // A
+            },
+            {
+                id: 7,
+                question: "You should eat a _______ diet with different kinds of food.",
+                options: ["A. noisy", "B. balanced", "C. dangerous", "D. boring"],
+                answer: 1 // B
+            },
+            {
+                id: 8,
+                question: "Eating too much _______ food can be bad for your health.",
+                options: ["A. fresh", "B. nutritious", "C. junk", "D. healthy"],
+                answer: 2 // C
+            },
+            {
+                id: 9,
+                question: "We should eat foods that are rich _______ vitamins and minerals.",
+                options: ["A. at", "B. on", "C. in", "D. for"],
+                answer: 2 // C
+            },
+            {
+                id: 10,
+                question: "You shouldn’t _______ late at night because your body needs enough rest.",
+                options: ["A. stay up", "B. get on", "C. take off", "D. look up"],
+                answer: 0 // A
+            },
+            {
+                id: 11,
+                question: "Which phrase means “tập thể dục thường xuyên”?",
+                options: ["A. make regular exercise", "B. do regular exercise", "C. take regular exercise", "D. play regular exercise"],
+                answer: 1 // B
+            },
+            {
+                id: 12,
+                question: "If you want to stay healthy, you should _______ sugary drinks.",
+                options: ["A. cut down on", "B. look forward to", "C. get on with", "D. take care"],
+                answer: 0 // A
+            },
+            {
+                id: 13,
+                question: "Which combination is correct?",
+                options: ["A. get enough sleep", "B. do enough sleep", "C. make enough sleep", "D. take enough sleep"],
+                answer: 0 // A
+            },
+            {
+                id: 14,
+                question: "You can improve your health by _______ a healthy lifestyle.",
+                options: ["A. following", "B. making", "C. doing", "D. playing"],
+                answer: 0 // A
+            },
+            {
+                id: 15,
+                question: "Which sentence contains the correct healthy-living collocations?",
+                options: [
+                    "A. Do exercise, drink water and get enough sleep.",
+                    "B. Make exercise, eat water and do enough sleep.",
+                    "C. Play exercise, make water and take enough sleep.",
+                    "D. Take exercise, do water and make enough sleep."
+                ],
+                answer: 0 // A
+            }
+        ];
+
+        /* Danh sách lời khen ngẫu nhiên khi làm đúng */
+        const praiseMessages = [
+            "Exactly!",
+            "Well-done!",
+            "Excellent!",
+            "You are really good at word matching!"
+        ];
+
+        // ==========================================================================
+        // KHỞI TẠO ÂM THANH BẰNG WEB AUDIO API (OFFLINE 100%)
+        // ==========================================================================
+        let audioCtx = null;
+        let isMuted = false;
+        let bgMusicInterval = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        /* Phát nhạc nền bằng Synthesizer đơn giản */
+        function playBackgroundMusic() {
+            if (isMuted || bgMusicInterval) return;
+            initAudio();
+
+            const notes = [261.63, 329.63, 392.00, 523.25, 440.00, 349.23]; // C4, E4, G4, C5, A4, F4
+            let noteIdx = 0;
+
+            bgMusicInterval = setInterval(() => {
+                if (isMuted || !audioCtx) return;
+                try {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(notes[noteIdx], audioCtx.currentTime);
+                    
+                    gain.gain.setValueAtTime(0.02, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
+
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.4);
+
+                    noteIdx = (noteIdx + 1) % notes.length;
+                } catch(e) {}
+            }, 500);
+        }
+
+        function stopBackgroundMusic() {
+            if (bgMusicInterval) {
+                clearInterval(bgMusicInterval);
+                bgMusicInterval = null;
+            }
+        }
+
+        /* Sound Effect: Trả lời đúng (Ping) */
+        function playCorrectSound() {
+            if (isMuted) return;
+            initAudio();
+            try {
+                const now = audioCtx.currentTime;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(523.25, now); // C5
+                osc.frequency.exponentialRampToValueAtTime(880, now + 0.2); // A5
+
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                osc.start(now);
+                osc.stop(now + 0.3);
+            } catch(e) {}
+        }
+
+        /* Sound Effect: Trả lời sai (Pop nhẹ) */
+        function playWrongSound() {
+            if (isMuted) return;
+            initAudio();
+            try {
+                const now = audioCtx.currentTime;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(220, now); // A3
+                osc.frequency.exponentialRampToValueAtTime(130, now + 0.25); // C3
+
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                osc.start(now);
+                osc.stop(now + 0.25);
+            } catch(e) {}
+        }
+
+        /* Sound Effect: Hoàn thành Game (Fanfare) */
+        function playVictorySound() {
+            if (isMuted) return;
+            initAudio();
+            try {
+                const now = audioCtx.currentTime;
+                const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+                notes.forEach((freq, idx) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, now + idx * 0.12);
+
+                    gain.gain.setValueAtTime(0.2, now + idx * 0.12);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.12 + 0.4);
+
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+
+                    osc.start(now + idx * 0.12);
+                    osc.stop(now + idx * 0.12 + 0.4);
+                });
+            } catch(e) {}
+        }
+
+        /* Bật / Tắt âm thanh */
+        function toggleAudio() {
+            isMuted = !isMuted;
+            const iconText = isMuted ? "🔇" : "🔊";
+            document.getElementById('soundIconStart').innerText = iconText;
+            document.getElementById('soundIconQuiz').innerText = iconText;
+
+            if (isMuted) {
+                stopBackgroundMusic();
+            } else {
+                playBackgroundMusic();
+            }
+        }
+
+
+        // ==========================================================================
+        // HIỆU ỨNG HẠT (HOA, LÁ, NGÔI SAO) RƠI
+        // ==========================================================================
+        const canvas = document.getElementById('particleCanvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor(x, y, type) {
+                this.x = x || Math.random() * canvas.width;
+                this.y = y || -10;
+                this.size = Math.random() * 12 + 8;
+                this.speedY = Math.random() * 2 + 1;
+                this.speedX = Math.random() * 2 - 1;
+                this.rotation = Math.random() * 360;
+                this.rotSpeed = Math.random() * 2 - 1;
+                this.type = type || ['⭐', '🍃', '🌸', '✨'][Math.floor(Math.random() * 4)];
+            }
+            update() {
+                this.y += this.speedY;
+                this.x += this.speedX;
+                this.rotation += this.rotSpeed;
+            }
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate((this.rotation * Math.PI) / 180);
+                ctx.font = `${this.size}px serif`;
+                ctx.fillText(this.type, 0, 0);
+                ctx.restore();
+            }
+        }
+
+        function triggerParticles(count = 25) {
+            for (let i = 0; i < count; i++) {
+                particles.push(new Particle(Math.random() * canvas.width, -20));
+            }
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update();
+                particles[i].draw();
+                if (particles[i].y > canvas.height + 20) {
+                    particles.splice(i, 1);
+                    i--;
+                }
+            }
+            requestAnimationFrame(animateParticles);
+        }
+        animateParticles();
+
+
+        // ==========================================================================
+        // QUẢN LÝ TRẠNG THÁI GAME
+        // ==========================================================================
+        let currentQuestionIdx = 0;
+        let score = 0;
+        let correctAnswersCount = 0;
+        let wrongAnswersCount = 0;
+        let isAnswered = false;
+
+        /* Bắt đầu trò chơi */
+        function startGame() {
+            initAudio();
+            playBackgroundMusic();
+
+            document.getElementById('startScreen').classList.add('hidden');
+            document.getElementById('resultScreen').classList.add('hidden');
+            document.getElementById('quizScreen').classList.remove('hidden');
+            document.getElementById('quizScreen').classList.add('flex');
+
+            currentQuestionIdx = 0;
+            score = 0;
+            correctAnswersCount = 0;
+            wrongAnswersCount = 0;
+
+            updateScoreDisplay();
+            loadQuestion();
+        }
+
+        /* Nạp dữ liệu câu hỏi */
+        function loadQuestion() {
+            isAnswered = false;
+            const q = quizData[currentQuestionIdx];
+
+            // Cập nhật đếm câu và tiến trình
+            document.getElementById('questionCounter').innerText = `Câu ${currentQuestionIdx + 1}/${quizData.length}`;
+            const progressPercent = ((currentQuestionIdx) / quizData.length) * 100;
+            document.getElementById('progressBar').style.width = `${progressPercent}%`;
+
+            // Nội dung câu hỏi
+            document.getElementById('questionText').innerText = q.question;
+
+            // Ẩn feedback
+            const feedbackEl = document.getElementById('feedbackContainer');
+            feedbackEl.className = "hidden my-3 p-3 rounded-2xl text-center font-bold text-base md:text-lg transition-all";
+
+            // Khóa nút Next
+            const btnNext = document.getElementById('btnNext');
+            btnNext.disabled = true;
+            document.getElementById('btnNextText').innerText = (currentQuestionIdx === quizData.length - 1) ? "Show Results" : "Next";
+
+            // Render 4 đáp án
+            const optionsGrid = document.getElementById('optionsGrid');
+            optionsGrid.innerHTML = '';
+
+            q.options.forEach((optText, index) => {
+                const btn = document.createElement('button');
+                btn.className = "btn-option bg-white hover:bg-amber-50 text-gray-800 font-bold py-4 px-6 rounded-2xl border-2 border-gray-300 text-left text-lg md:text-xl w-full flex items-center justify-between cursor-pointer";
+                btn.innerHTML = `<span>${optText}</span><span class="status-icon"></span>`;
+                btn.onclick = () => selectOption(index);
+                optionsGrid.appendChild(btn);
+            });
+        }
+
+        /* Xử lý khi chọn đáp án */
+        function selectOption(selectedIndex) {
+            if (isAnswered) return;
+            isAnswered = true;
+
+            const q = quizData[currentQuestionIdx];
+            const optionButtons = document.getElementById('optionsGrid').children;
+            const feedbackEl = document.getElementById('feedbackContainer');
+            const feedbackIcon = document.getElementById('feedbackIcon');
+            const feedbackText = document.getElementById('feedbackText');
+
+            // Khóa tất cả các nút
+            Array.from(optionButtons).forEach(btn => btn.disabled = true);
+
+            if (selectedIndex === q.answer) {
+                // ĐÚNG
+                score += 10;
+                correctAnswersCount++;
+                playCorrectSound();
+                triggerParticles(15);
+
+                optionButtons[selectedIndex].classList.add('correct');
+                optionButtons[selectedIndex].querySelector('.status-icon').innerText = '✅';
+
+                // Lời khen ngẫu nhiên
+                const randomPraise = praiseMessages[Math.floor(Math.random() * praiseMessages.length)];
+                feedbackEl.className = "my-3 p-3 rounded-2xl text-center font-bold text-base md:text-lg bg-emerald-100 text-emerald-800 border border-emerald-300 block animate-bounce";
+                feedbackIcon.innerText = "🎉";
+                feedbackText.innerText = randomPraise;
+            } else {
+                // SAI
+                wrongAnswersCount++;
+                playWrongSound();
+
+                optionButtons[selectedIndex].classList.add('wrong');
+                optionButtons[selectedIndex].querySelector('.status-icon').innerText = '❌';
+
+                // Hiển thị đáp án đúng
+                optionButtons[q.answer].classList.add('correct');
+                optionButtons[q.answer].querySelector('.status-icon').innerText = '✅';
+
+                const correctAnswerText = q.options[q.answer];
+                feedbackEl.className = "my-3 p-3 rounded-2xl text-center font-bold text-base md:text-lg bg-rose-100 text-rose-800 border border-rose-300 block";
+                feedbackIcon.innerText = "💡";
+                feedbackText.innerText = `Incorrect! The correct answer is: ${correctAnswerText}`;
+            }
+
+            updateScoreDisplay();
+            document.getElementById('btnNext').disabled = false;
+        }
+
+        /* Cập nhật điểm số */
+        function updateScoreDisplay() {
+            document.getElementById('scoreText').innerText = `Điểm: ${score}`;
+        }
+
+        /* Chuyển câu tiếp theo hoặc màn hình kết quả */
+        function nextQuestion() {
+            if (currentQuestionIdx < quizData.length - 1) {
+                currentQuestionIdx++;
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        /* Hiển thị màn hình kết quả */
+        function showResults() {
+            document.getElementById('quizScreen').classList.remove('flex');
+            document.getElementById('quizScreen').classList.add('hidden');
+            document.getElementById('resultScreen').classList.remove('hidden');
+
+            playVictorySound();
+            triggerParticles(50);
+
+            // Cập nhật thông số
+            document.getElementById('finalScore').innerText = `${score}/150`;
+            document.getElementById('correctCount').innerText = correctAnswersCount;
+            document.getElementById('wrongCount').innerText = wrongAnswersCount;
+
+            // Nhận xét theo khoảng điểm
+            const commentEl = document.getElementById('resultComment');
+            if (score >= 110) {
+                commentEl.innerText = "Excellent! You are a master of healthy living word matching!";
+            } else if (score >= 90) {
+                commentEl.innerText = "Great job! You are really good at word matching!";
+            } else if (score >= 70) {
+                commentEl.innerText = "Not bad! Let's practice a bit more!";
+            } else {
+                commentEl.innerText = "Keep trying! Play again to conquer the challenge!";
+            }
+        }
+
+        /* Reset chơi lại game */
+        function restartGame() {
+            startGame();
+        }
+    </script>
+</body>
+</html>
